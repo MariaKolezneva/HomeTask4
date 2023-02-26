@@ -1,0 +1,4 @@
+создание таблиц:
+1. CREATE TABLE Users (userId INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(50),address VARCHAR(225));
+2. CREATE TABLE Accounts (accountId INTEGER PRIMARY KEY AUTOINCREMENT, userId INTEGER(10), balance NUMERIC(15,3),currency VARCHAR(10), FOREIGN KEY (userId) REFERENCES Users(userId));
+3. CREATE TABLE Transactions (transactinId INTEGER PRIMARY KEY AUTOINCREMENT, accountId INTEGER(10), amount NUMERIC(15,3), FOREIGN KEY (accountId) REFERENCES Accounts(accountId));

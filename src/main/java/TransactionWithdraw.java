@@ -5,9 +5,11 @@ import java.sql.*;
 
 public class TransactionWithdraw {
     private static final Object lock = new Object();
+    public static final BigDecimal MAX_WITHDRAW_AMOUNT = new BigDecimal("100000000");
+
 
     public void withdraw(int accountId, BigDecimal amount) throws IllegalArgumentException {
-        if (amount.compareTo(new BigDecimal("100000000")) > 0) {
+        if (amount.compareTo(MAX_WITHDRAW_AMOUNT) > 0) {
             throw new IllegalArgumentException("Transaction withdraw amount exceeds maximum limit.");
         }
         if (amount.compareTo(BigDecimal.ZERO) == 0) {

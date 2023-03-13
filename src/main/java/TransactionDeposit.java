@@ -4,9 +4,11 @@ import java.sql.*;
 
 public class TransactionDeposit {
     private static final Object lock = new Object();
+    public static final BigDecimal MAX_BALANCE = new BigDecimal("2000000000");
+    public static final BigDecimal MAX_DEPOSIT_AMOUNT = new BigDecimal("100000000");
 
     public void deposit(int accountId, BigDecimal amount) throws IllegalArgumentException {
-        if (amount.compareTo(new BigDecimal("100000000")) > 0) {
+        if (amount.compareTo(MAX_DEPOSIT_AMOUNT) > 0) {
             throw new IllegalArgumentException("Transaction deposit amount exceeds maximum limit.");
         }
         if (amount.compareTo(BigDecimal.ZERO) == 0) {
@@ -15,18 +17,17 @@ public class TransactionDeposit {
         synchronized (lock) {
             String sql = "UPDATE Accounts SET balance = balance + ? WHERE accountId = ?";
             try (Connection conn = DriverManager.getConnection(Database.DATABASE_URL)) {
-                conn.setAutoCommit(false); // устанавливаем автокоммит в false
+                conn.setAutoCommit(false);
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setBigDecimal(1, amount.setScale(3, RoundingMode.HALF_DOWN));
                     pstmt.setInt(2, accountId);
                     pstmt.executeUpdate();
                     BigDecimal newBalance = getAccountBalance(accountId).add(amount.setScale(3, RoundingMode.HALF_DOWN));
-                    if (newBalance.compareTo(BigDecimal.valueOf(2000000000)) > 0) {
-                        conn.rollback(); // откатываем транзакцию
+                    if (newBalance.compareTo(MAX_BALANCE) > 0) {
+                        conn.rollback();
                         throw new IllegalArgumentException("Account balance exceeds maximum limit.");
                     }
-
-                    conn.commit(); // фиксируем транзакцию
+                    conn.commit();
                     addTransactionDeposit(accountId, amount);
                 }
             } catch (SQLIntegrityConstraintViolationException e) {
@@ -74,9 +75,8 @@ public class TransactionDeposit {
     }
 
     public static boolean isValidBalance(BigDecimal balance) {
-        BigDecimal maxBalance = new BigDecimal("2000000000");
         BigDecimal zero = BigDecimal.ZERO;
-        return balance.compareTo(zero) >= 0 && balance.compareTo(maxBalance) <= 0;
+        return balance.compareTo(zero) >= 0 && balance.compareTo(MAX_BALANCE) <= 0;
     }
 }
 

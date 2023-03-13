@@ -10,7 +10,7 @@ public class UserTest {
         Currency currency = Currency.EUR;
         Account account = new Account(1, currency);
         boolean exists = User.accountExists(account);
-        assertFalse(exists);
+        assertFalse("User not created",exists);
     }
 
     @Test
@@ -19,8 +19,9 @@ public class UserTest {
         BigDecimal balance2 = new BigDecimal("-100");
         BigDecimal balance3 = new BigDecimal("2000000001");
 
-        assertTrue(TransactionDeposit.isValidBalance(balance1));
-        assertFalse(TransactionDeposit.isValidBalance(balance2));
-        assertFalse(TransactionDeposit.isValidBalance(balance3));
+        assertTrue("Balance should be positive", TransactionDeposit.isValidBalance(balance1));
+        assertFalse("Balance should not be negative", TransactionDeposit.isValidBalance(balance2));
+        assertFalse("Balance exceeds limit", TransactionDeposit.isValidBalance(balance3));
     }
-}
+    }
+
